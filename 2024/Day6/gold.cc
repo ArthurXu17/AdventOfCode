@@ -22,42 +22,60 @@ bool goesOutOfBounds(int x, int y, int dx, int dy, int m, int n) {
     return x + dx < 0 || x + dx >= n || y + dy < 0 || y+dy >= m;
 }
 
-bool isLoop(int x, int y, int dx, int dy, int m, int n, vector<string>& grid) {
-    int x0 = x;
-    int y0 = y;
-    int dx0 = dx;
-    int dy0 = dy;
-    int numTurns = 0;
-    int firstStraightLength = -1;
-    int reverseStraightLength = -1;
-    int curLength = 0;
+    bool isCycle(vector<string>& grid, int x, int y)
+    {
+
+        vector<pair<int, int>> directions =  {{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
+        int direction = 0;
+        map<tuple<int, int, int>, bool> visited;
+        pair<int, int> current = make_pair(x,y);
+        while (current.first >= 0 && current.first < grid.size() && current.second >= 0 && current.second < grid[0].size())
+        {
+            if (visited[{current.first, current.second, direction}])
+            {
+                return true;
+            }
+            visited[{current.first, current.second, direction}] = true;
+            if (
+                current.first + directions[direction].first < 0 ||
+                current.first + directions[direction].first >= grid.size() ||
+                current.second + directions[direction].second < 0 ||
+                current.second + directions[direction].second >= grid[0].size())
+            {
+                return false;
+            }
+            if (grid[current.first + directions[direction].first][current.second + directions[direction].second] == '#')
+            {
+                direction++;
+                direction %= 4;
+            }
+            else
+            {
+                current.first += directions[direction].first;
+                current.second += directions[direction].second;
+            }
+        }
+        return false;
+    }
+
+bool isLoop(vector<string>& grid, int x, int y, int m, int n) {
+    int dx = -1;
+    int dy = 0;
+    int iterations = 0;
     while (true) {
+        if (iterations > 4*m * n) {
+            return true;
+        }
+        //cout<<x<<", "<<y<<endl;
         if (goesOutOfBounds(x,y,dx,dy,m,n)) {
             break;
         }
         if (grid[x+dx][y+dy] == '#') {
             changeDirection(dx,dy);
-            if (numTurns == 0) {
-                numTurns++;
-                firstStraightLength = curLength;
-                curLength = 0;
-            } else if (numTurns == 1) {
-                numTurns++;
-                curLength = 0;
-            } else if (numTurns == 2) {
-                reverseStraightLength = curLength;
-                if (firstStraightLength == reverseStraightLength) {
-                    cout<<"Found solution"<<endl;
-                    cout<<"Initial position: "<<x0<<", "<<y0<<endl;
-                    cout<<"Initial direction: "<<dx0<<", "<<dy0<<endl;
-                    cout<<"Straight Length: "<<firstStraightLength<<endl;
-                }
-                return firstStraightLength == reverseStraightLength;
-            }
         }
-        curLength++;
         x += dx;
         y += dy;
+        iterations++;
     }
     return false;
 }
@@ -82,29 +100,63 @@ int main() {
     }
     int n = grid.size();
     int m = grid[0].size();
-    //cout<<n<<" x "<< m<<endl;
-    int dx = -1;
-    int dy = 0;
     int result = 0;
-    while (true) {
-        if (goesOutOfBounds(x,y,dx,dy,m,n)) {
-            break;
-        }
-        
-        if (grid[x+dx][y+dy] == '#') {
-            changeDirection(dx,dy);
-        } else {
-            int new_dx = dx;
-            int new_dy = dy;
-            changeDirection(new_dx, new_dy);
-            if (isLoop(x, y, new_dx, new_dy, m, n, grid)) {
-                cout<<"O placement: "<<x+dx<<", "<<y+dy<<endl;
-                result++;
+    cout<<n<<" x "<<m<<endl;
+    // iteratively brute force adding obstacle at each coordinate
+    int ob = 0;
+    int blank = 0;
+    int other = 0;
+    for (auto & str : grid) {
+        for (auto & c : str) {
+            if (c == '#') {
+                ob++;
+            } else if (c == '.') {
+                blank++;
+            } else {
+                other++;
             }
         }
-        x += dx;
-        y += dy;
     }
-    cout<<result<<endl;
+    cout<<"Obstacles: "<<ob<<endl;
+    cout<<"Empty: "<<blank<<endl;
+    cout<<"Start: "<<other<<endl;
+    int checks = 0;
+    set<pair<int, int>> correct;
+    set<pair<int, int>> me;
+    for (int i = 0; i < n ; i++) {
+        cout<<i<<endl;
+        for (int j = 0 ; j < m ;j++) {
+            if (grid[i][j] != '.') {
+                continue;
+            }
+            checks++;
+            grid[i][j] = '#';
+            if (isCycle(grid, x,y)) {
+                //cout<<i<<", "<<j<<endl;
+                correct.insert(make_pair(i,j));
+            }
+            if (isLoop(grid, x,y, m, n)) {
+                //cout<<i<<", "<<j<<endl;
+                me.insert(make_pair(i,j));
+            }
+            grid[i][j] = '.';
+        }
+    }
+    cout<<checks<<endl;
+    cout<<"Correct Size: "<<correct.size()<<endl;
+    cout<<"MY Size: "<<me.size()<<endl;
+    cout<<"Correct not in mine: "<<endl;
+    for (auto & p : correct){
+        if (me.find(p) == me.end()) {
+            cout<<p.first<<", "<<p.second<<endl;
+        }
+    }
+    cout<<"Wrong but in mine: "<<endl;
+    for (auto & p : me){
+        if (correct.find(p) == correct.end()) {
+            cout<<p.first<<", "<<p.second<<endl;
+        }
+    }
+
 }
 
