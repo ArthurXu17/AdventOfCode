@@ -54,9 +54,10 @@ int main() {
         }
         if (grid[x+dx][y+dy] == '#') {
             changeDirection(dx,dy);
+        } else {
+            x += dx;
+            y += dy;
         }
-        x += dx;
-        y += dy;
     }
     int result = 0;
     for (auto & vec : visited) {
