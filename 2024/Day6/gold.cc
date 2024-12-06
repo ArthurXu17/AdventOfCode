@@ -59,6 +59,28 @@ bool goesOutOfBounds(int x, int y, int dx, int dy, int m, int n) {
     }
 
 bool isLoop(vector<string>& grid, int x, int y, int m, int n) {
+
+    vector<vector<set<pair<int, int>>>> previousDirections(n, vector<set<pair<int, int>>>(m, set<pair<int, int>>())); // for each location, store the directions that we've been at that location
+    int dx = -1;
+    int dy = 0;
+    int result = 0;
+    while (!(x < 0 || x >= n || y < 0 || y>= m)) {
+        //cout<<x<<", "<<y<<endl;
+        if (previousDirections[x][y].find(make_pair(dx, dy)) != previousDirections[x][y].end()) {
+            return true;
+        }
+        previousDirections[x][y].insert(make_pair(dx,dy));
+        
+        if (!goesOutOfBounds(x,y,dx,dy,m,n) && grid[x+dx][y+dy] == '#') {
+            changeDirection(dx,dy);
+        } else {
+            x += dx;
+            y += dy;
+
+        }
+    }
+    return false;
+    /*
     int dx = -1;
     int dy = 0;
     int iterations = 0;
@@ -77,7 +99,7 @@ bool isLoop(vector<string>& grid, int x, int y, int m, int n) {
         y += dy;
         iterations++;
     }
-    return false;
+    return false;*/
 }
 
 int main() {
@@ -145,6 +167,8 @@ int main() {
     cout<<checks<<endl;
     cout<<"Correct Size: "<<correct.size()<<endl;
     cout<<"MY Size: "<<me.size()<<endl;
+    cout<<"MY Size2: "<<me.size()<<endl;
+    
     cout<<"Correct not in mine: "<<endl;
     for (auto & p : correct){
         if (me.find(p) == me.end()) {
