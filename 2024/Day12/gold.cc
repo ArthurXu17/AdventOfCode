@@ -144,37 +144,18 @@ int main() {
     }
     numEdges[curId]++;
 
-    for (int r = 0; r < m - 1; r++) {
-        for (int c = 0; c < n - 1; c++) {
-            // 8 possibile configurations
-            // No edges ending at index c
-            // c c+1
-            /* A A         A B         A A         A B         A A
-               A A    or   A A    or   A B    or   A B    or   B B
-            */
-            // edges ending at index c
-            /* A A          A B          A B
-               B A    or    B B    or    B A
-            */
-
-            if (myGrid[r][c] == myGrid[r+1][c]) {
-                continue;
-            }
-            // assume myGrid[r][c] != myGrid[r+1][c]
-            // first condition handles 1 + 2, second condition handles case 3
-            if (myGrid[r][c+1] == myGrid[r+1][c+1] || myGrid[r][c] != myGrid[r][c+1]) {
-                numEdges[myGrid[r][c]]++;
-                continue;
-            }
-        }
-        // for myGrid[r][n-1], just check row below doesn't match
-        if (myGrid[r][n-1] != myGrid[r+1][n-1]) {
-            numEdges[myGrid[r][n-1]]++;
+    countEdgesAlongRows(myGrid, numEdges, 1);
+    countEdgesAlongRows(myGrid, numEdges, -1);
+    vector<vector<int>> transpose(n, vector<int>(m, 0));
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            transpose[j][i] = myGrid[i][j];
         }
     }
+    countEdgesAlongRows(transpose, numEdges, 1);
+    countEdgesAlongRows(transpose, numEdges, -1);
 
-
-    for (int i = 0; i < m; i++) {
+    /*for (int i = 0; i < m; i++) {
         for (int j = 0 ; j < n ; j++) {
             cout<<myGrid[i][j];
         }
@@ -187,7 +168,7 @@ int main() {
     cout<<"Edges: "<<endl;
     for (int i = 0; i < id; i++) {
         cout<<i<<": "<<numEdges[i]<<endl;
-    }
+    }*/
 
     
     int cost = 0;
