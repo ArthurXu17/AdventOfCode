@@ -60,12 +60,18 @@ int main() {
                 pq.push({distance[x+dx][y+dy][direction], x+dx, y+dy, direction});
             }
             int newDirection = (direction + 1)%4;
+            if (newDirection < 0) {
+                newDirection += 4;
+            }
             if (distance[x][y][direction] + 1000 < distance[x][y][newDirection]) {
                  distance[x][y][newDirection] = distance[x][y][direction] + 1000;
                  pq.push({distance[x][y][newDirection], x, y, newDirection});
             }
 
             newDirection = (direction - 1)%4;
+            if (newDirection < 0) {
+                newDirection += 4;
+            }
             if (distance[x][y][direction] + 1000 < distance[x][y][newDirection]) {
                  distance[x][y][newDirection] = distance[x][y][direction] + 1000;
                  pq.push({distance[x][y][newDirection], x, y, newDirection});
