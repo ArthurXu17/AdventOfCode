@@ -60,7 +60,6 @@ int main()
             }
         }
     }
-    // for (int initDirection = 0; initDirection <= 3; initDirection++) {
     int initDirection = 3;
     priority_queue<vector<ll>, vector<vector<ll>>, greater<vector<ll>>> pq;
     vector<vector<vector<ll>>> distance(m, vector<vector<ll>>(n, vector<ll>(4, LLONG_MAX)));
@@ -79,29 +78,20 @@ int main()
         if (x == endx && y == endy) {
             continue;
         }
-        if (grid[x + dx][y + dy] != '#' && curDistance + 1 <= distance[x + dx][y + dy][direction])
+        if (grid[x + dx][y + dy] != '#' && curDistance + 1 < distance[x + dx][y + dy][direction])
         {
-            /*if (x+dx == endx && y+dy == endy) {
-                cout<<"Sole parent of end: "<<x<<", "<<y<<endl;
-                cout<<"Previous min distance to end: "<<distance[x + dx][y + dy][direction]<<endl;
-            }*/
             distance[x + dx][y + dy][direction] = curDistance + 1;
-            /*if (x+dx == endx && y+dy == endy) {
-                cout<<"Min distance to end after update: "<<distance[x + dx][y + dy][direction]<<endl;*/
             pq.push({distance[x + dx][y + dy][direction], x + dx, y + dy, direction});
+            parents[x + dx][y + dy][direction] = {{x, y, direction}};
+        } else if (grid[x + dx][y + dy] != '#' && curDistance + 1 == distance[x + dx][y + dy][direction]) {
             parents[x + dx][y + dy][direction].push_back({x, y, direction});
-        } /*else if (grid[x + dx][y + dy] != '#' && curDistance + 1 == distance[x + dx][y + dy][direction]) {
-            parents[x + dx][y + dy].push_back(make_pair(x,y));
-            if (x+dx == endx && y+dy == endy) {
-                cout<<"Additional parent of end: "<<x<<", "<<y<<endl;
-            }
-        }*/
+        }
         int newDirection = (direction + 1) % 4;
         if (newDirection < 0)
         {
             newDirection += 4;
         }
-        if (distance[x][y][direction] + 1000 <= distance[x][y][newDirection])
+        if (distance[x][y][direction] + 1000 < distance[x][y][newDirection])
         {
             distance[x][y][newDirection] = distance[x][y][direction] + 1000;
             pq.push({distance[x][y][newDirection], x, y, newDirection});
@@ -113,7 +103,7 @@ int main()
         {
             newDirection += 4;
         }
-        if (distance[x][y][direction] + 1000 <= distance[x][y][newDirection])
+        if (distance[x][y][direction] + 1000 < distance[x][y][newDirection])
         {
             distance[x][y][newDirection] = distance[x][y][direction] + 1000;
             pq.push({distance[x][y][newDirection], x, y, newDirection});
@@ -132,31 +122,6 @@ int main()
             endDirections.push_back(endD);
         }
     }
-
-    /*for (int i = 1; i <= 3; i++) {
-        cout<<"Parents of 1, "<<i<<": ";
-        for (auto & [x,y] : parents[1][i]) {
-            cout<<x<<", "<<y<<"; ";
-        }
-        cout<<endl;
-    }
-    for (int i = 2; i <= 4; i++) {
-        cout<<"Parents of 3, "<<i<<": ";
-        for (auto & [x,y] : parents[3][i]) {
-            cout<<x<<", "<<y<<"; ";
-        }
-        cout<<endl;
-    }
-    cout<<"Parents of 2, 4: ";
-        for (auto & [x,y] : parents[2][4]) {
-            cout<<x<<", "<<y<<"; ";
-        }
-    cout<<endl;
-    cout<<"Parents of 1, 4: ";
-        for (auto & [x,y] : parents[1][4]) {
-            cout<<x<<", "<<y<<"; ";
-        }
-    cout<<endl;*/
     queue<node> parentsBfs;
     for (auto & endD : endDirections) {
         cout<<"Possible End direction: "<<endD<<endl;
