@@ -41,7 +41,8 @@ int main() {
         }
     }
     ll answer = LLONG_MAX;
-    for (int initDirection = 0; initDirection <= 3; initDirection++) {
+    //for (int initDirection = 0; initDirection <= 3; initDirection++) {
+        int initDirection = 3;
         priority_queue<vector<ll>, vector<vector<ll>>, greater<vector<ll>>> pq;
         vector<vector<vector<ll>>> distance(m, vector<vector<ll>>(n, vector<ll>(4, LLONG_MAX)));
         pq.push({0, startx, starty, initDirection});
@@ -73,7 +74,7 @@ int main() {
         for (int endD = 0; endD <= 3; endD++) {
             answer = min(answer, distance[endx][endy][endD]);
         }
-    } 
+    //} 
     cout<<answer<<endl;
     
 
