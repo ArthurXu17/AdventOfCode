@@ -35,9 +35,9 @@ int baseBfs(vector<string>& grid, int sx, int sy, int ex, int ey, vector<vector<
 }
 
 // given starting point x, y, find possible end locations after going through at most numWalls
-map<p, int> getCheatingNeighbours(vector<string>& grid, int sx, int sy, int numWalls) {
+map<p, unordered_set<int>> getCheatingNeighbours(vector<string>& grid, int sx, int sy, int numWalls) {
     queue<p> bfs;
-    map<p, int> result; // map each new location to it's distance
+    map<p, unordered_set<int>> result; // map each new location to possible distances required to get there
     int m = grid.size();
     int n = grid[0].size();
     vector<vector<int>> distance(m, vector<int>(n, -1));
@@ -59,10 +59,14 @@ map<p, int> getCheatingNeighbours(vector<string>& grid, int sx, int sy, int numW
             if (!inBounds(nx, ny, m, n)) {
                 continue;
             }
-            if (distance[nx][ny] == -1 && grid[nx][ny] != '#' && grid[x][y] == '#') {
+            if (grid[nx][ny] != '#' && grid[x][y] == '#') {
                 // reached end of cheating
-                distance[nx][ny] = distance[x][y] + 1;
-                result[make_pair(nx, ny)] = distance[nx][ny];
+                auto destination = make_pair(nx, ny);
+                if (result.count(destination)) {
+                    result[destination].insert(distance[x][y] + 1);
+                } else {
+                    result[destination] = {distance[x][y] + 1};
+                }
             } else if (distance[nx][ny] == -1 && grid[nx][ny] == '#') {
                 // stay cheating
                 distance[nx][ny] = distance[x][y] + 1;
@@ -97,7 +101,7 @@ int main() {
     vector<vector<int>> distanceToEnd(m, vector<int>(n, -1));
     baseBfs(grid, ex, ey, -10, -10, distanceToEnd);
     int baseDistance = distanceToEnd[sx][sy];
-    vector<vector<map<p, int>>> cheatingNeighbours(m, vector<map<p, int>>(n, map<p,int>()));
+    vector<vector<map<p, unordered_set<int>>>> cheatingNeighbours(m, vector<map<p, unordered_set<int>>>(n, map<p, unordered_set<int>>()));
     for (int i = 0; i < m; i++) {
         for (int j = 0; j < m; j++) {
             if (grid[i][j] != '#') {
@@ -128,18 +132,23 @@ int main() {
             }
         }
         // checking cheating routes
-        map<p, int> cheatingRoutes = cheatingNeighbours[x][y];
-        for (auto [dest, cost] : cheatingRoutes) {
-            int totalRouteLength = distanceFromStart[x][y] + cost + distanceToEnd[dest.first][dest.second];
-            int delta = baseDistance - totalRouteLength;
-            if (delta >= 100) {
-                result++;
+        map<p, unordered_set<int>> cheatingRoutes = cheatingNeighbours[x][y];
+        for (auto [dest, costList] : cheatingRoutes) {
+            if (costList.size() > 1) {
+                cout<<"Cost List at least 2"<<endl;
             }
-            if (delta >= 50) {
-                if (cheatCount.count(delta)) {
-                    cheatCount[delta]++;
-                } else {
-                    cheatCount[delta] = 1;
+            for (auto & cost : costList) {
+                int totalRouteLength = distanceFromStart[x][y] + cost + distanceToEnd[dest.first][dest.second];
+                int delta = baseDistance - totalRouteLength;
+                if (delta >= 100) {
+                    result++;
+                }
+                if (delta >= 50) {
+                    if (cheatCount.count(delta)) {
+                        cheatCount[delta]++;
+                    } else {
+                        cheatCount[delta] = 1;
+                    }
                 }
             }
         }
